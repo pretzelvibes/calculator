@@ -18,8 +18,8 @@ const btnDivide = document.querySelector("#divide");
 const btnPercent = document.querySelector("#percent");
 const btnClear = document.querySelector("#clear");
 const btnClearDisplay = document.querySelector("#clearDisplay");
-
 const displayHistory = document.querySelector("#history");
+const display = document.querySelector("#display");
 
 btnChangeSign.addEventListener("click", () => appendNumber("-"));
 btnZero.addEventListener("click", () => appendNumber("0"));
@@ -136,7 +136,6 @@ function clear() {
 }
 
 function updateDisplay(value) {
-    const display = document.querySelector("#display");
     display.textContent = value;
 }
 

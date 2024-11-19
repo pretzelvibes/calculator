@@ -45,34 +45,26 @@ btnClearDisplay.addEventListener("click", clearDisplay);
 let currentInput = "";
 let operator = null;
 let previousValue = "";
-let calculationComplete = false;
 let history = "";
+let calculationComplete = false;
 
 function appendNumber(number) {
     if (calculationComplete) {
-        handleCalculationComplete(number);
-    }
-    switch (number) {
-        case "-":
-            toggleNegativeSign();
-            break;
-        case ".":
-            toggleDot();
-            break;
-        default:
-            currentInput += number;
-            break;
-    }
-    updateDisplay(currentInput);
-}
-
-function handleCalculationComplete(number) {
-    if (number === "-") {
-        toggleNegativeSign(true);
+        if (number === "-") {
+            toggleNegativeSign(true);
+        } else {
+            reset();
+            calculationComplete = false;
+            currentInput = number;
+        }
     } else {
-        reset();
-        calculationComplete = false;
+        if (number === ".") {
+            toggleDot();
+        } else {
+            currentInput += number;
+        }
     }
+    updateDisplay(currentInput || previousValue);
 }
 
 function toggleDot() {
@@ -82,30 +74,48 @@ function toggleDot() {
 }
 
 function toggleNegativeSign(applyToPrevious = false) {
-    if (applyToPrevious) {
-        previousValue = previousValue.startsWith("-") ? previousValue.slice(1) : "-" + previousValue;
+    if (calculationComplete) {
+        if (applyToPrevious) {
+            previousValue = previousValue.startsWith("-")
+                ? previousValue.slice(1)
+                : "-" + previousValue;
+            updateDisplay(previousValue);
+        }
     } else {
-        currentInput = currentInput.startsWith("-") ? currentInput.slice(1) : "-" + currentInput;
+        if (applyToPrevious) {
+            previousValue = previousValue.startsWith("-")
+                ? previousValue.slice(1)
+                : "-" + previousValue;
+        } else {
+            currentInput = currentInput.startsWith("-")
+                ? currentInput.slice(1)
+                : "-" + currentInput;
+        }
+        updateDisplay(currentInput || previousValue);
     }
 }
 
 function appendOperator(op) {
+    if (calculationComplete) {
+        calculationComplete = false;
+    }
     if (currentInput === "" && previousValue === "") return;
     if (currentInput !== "") {
         if (previousValue === "") {
             previousValue = currentInput;
+        } else if (operator) {
+            calculate();
         }
     }
     updateHistory(previousValue + op);
     operator = op;
     currentInput = "";
-    calculationComplete = false;
 }
 
 function calculate() {
     if (currentInput === "" || !operator) return;
     let result = operate(parseFloat(previousValue), parseFloat(currentInput), operator);
-    result = Number((result).toFixed(10));
+    result = (Number((result).toFixed(10))).toString();
     updateHistory(displayHistory.textContent + currentInput + "=");
     updateDisplay(result);
     reset(result);

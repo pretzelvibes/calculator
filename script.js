@@ -52,12 +52,16 @@ function appendNumber(number) {
     if (calculationComplete) {
         handleCalculationComplete(number);
     }
-    if (number === "-") {
-        toggleNegativeSign();
-    } else if (number === ".") {
-        toggleDot();
-    } else {
-        currentInput += number;
+    switch (number) {
+        case "-":
+            toggleNegativeSign();
+            break;
+        case ".":
+            toggleDot();
+            break;
+        default:
+            currentInput += number;
+            break;
     }
     updateDisplay(currentInput);
 }
@@ -72,12 +76,8 @@ function handleCalculationComplete(number) {
 }
 
 function toggleDot() {
-    if (currentInput.indexOf(".") === -1) {
-        if (currentInput === "") {
-            currentInput = "0.";
-        } else {
-            currentInput += ".";
-        }
+    if (!currentInput.includes(".")) {
+        currentInput += currentInput ? "." : "0.";
     }
 }
 

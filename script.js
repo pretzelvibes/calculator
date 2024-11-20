@@ -106,7 +106,9 @@ function appendOperator(op) {
     if (calculationComplete) {
         calculationComplete = false;
     }
-    if (currentInput === "" && previousValue === "") return;
+    if (currentInput === "" && previousValue === "") {
+        currentInput = "0";
+    }
     if (currentInput !== "") {
         if (previousValue === "") {
             previousValue = currentInput;
@@ -120,7 +122,17 @@ function appendOperator(op) {
 }
 
 function calculate() {
-    if (currentInput === "" || !operator) return;
+    if (error) {
+        error = false;
+        toggleButtonState(error);
+        reset();
+        calculationComplete = false;
+        updateDisplay("0");
+        updateHistory("");
+        return;
+    }
+    if (currentInput === "") currentInput = "0";
+    if (!operator) return;
     let result = operate(parseFloat(previousValue), parseFloat(currentInput), operator);
     if (result !== "Error") {
         result = (Number((result).toFixed(10))).toString();

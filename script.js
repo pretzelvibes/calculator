@@ -51,6 +51,7 @@ let calculationComplete = false;
 let error = false;
 
 function appendNumber(number) {
+    if (currentInput === "0" && number === "0") return;
     if (calculationComplete) {
         if (number === "-") {
             toggleNegativeSign(true);
@@ -61,8 +62,13 @@ function appendNumber(number) {
                 updateHistory("");
             }
             reset();
+            if (number === ".") {
+                toggleDot();
+            } else {
+                currentInput = number;
+            }
+            updateHistory("");
             calculationComplete = false;
-            currentInput = number;
         }
     } else {
         if (number === ".") {
@@ -77,6 +83,7 @@ function appendNumber(number) {
 function toggleDot() {
     if (!currentInput.includes(".")) {
         currentInput += currentInput ? "." : "0.";
+        btnDot.disabled = true;
     }
 }
 
@@ -87,6 +94,7 @@ function toggleNegativeSign(applyToPrevious = false) {
                 ? previousValue.slice(1)
                 : "-" + previousValue;
             updateDisplay(previousValue);
+            updateHistory(previousValue);
         }
     } else {
         if (applyToPrevious) {
@@ -111,6 +119,9 @@ function appendOperator(op) {
     }
     if (currentInput !== "") {
         if (previousValue === "") {
+            if (currentInput === "0.") {
+                currentInput = "0";
+            }
             previousValue = currentInput;
         } else if (operator) {
             calculate();
@@ -119,6 +130,7 @@ function appendOperator(op) {
     updateHistory(previousValue + op);
     operator = op;
     currentInput = "";
+    btnDot.disabled = false;
 }
 
 function calculate() {
@@ -144,6 +156,7 @@ function calculate() {
     updateDisplay(result);
     reset(result);
     calculationComplete = true;
+    btnDot.disabled = false;
 }
 
 function operate(a, b, op) {

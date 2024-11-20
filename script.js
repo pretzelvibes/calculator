@@ -73,6 +73,8 @@ function appendNumber(number) {
     } else {
         if (number === ".") {
             toggleDot();
+        } else if (number === "-") {
+            toggleNegativeSign();
         } else {
             currentInput += number;
         }

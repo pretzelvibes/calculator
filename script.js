@@ -182,6 +182,9 @@ function clear() {
         error = false;
         clearDisplay();
         toggleButtonState(error);
+    } else if (calculationComplete) {
+        calculationComplete = false;
+        clearDisplay();
     } else {
         currentInput = "";
         updateDisplay("0");

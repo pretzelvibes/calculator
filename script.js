@@ -20,6 +20,7 @@ const btnClear = document.querySelector("#clear");
 const btnClearDisplay = document.querySelector("#clearDisplay");
 const displayHistory = document.querySelector("#history");
 const display = document.querySelector("#display");
+const btnOperator = document.querySelectorAll(".operator");
 
 btnChangeSign.addEventListener("click", () => appendNumber("-"));
 btnZero.addEventListener("click", () => appendNumber("0"));
@@ -38,7 +39,7 @@ btnMinus.addEventListener("click", () => appendOperator("-"));
 btnPer.addEventListener("click", () => appendOperator("*"));
 btnEqual.addEventListener("click", calculate);
 btnDivide.addEventListener("click", () => appendOperator("/"));
-btnPercent.addEventListener("click", () => appendOperator("%"));
+btnPercent.addEventListener("click", () => appendNumber("%"));
 btnClear.addEventListener("click", clear);
 btnClearDisplay.addEventListener("click", clearDisplay);
 
@@ -47,12 +48,18 @@ let operator = null;
 let previousValue = "";
 let history = "";
 let calculationComplete = false;
+let error = false;
 
 function appendNumber(number) {
     if (calculationComplete) {
         if (number === "-") {
             toggleNegativeSign(true);
         } else {
+            if (error) {
+                error = false;
+                toggleButtonState(error);
+                updateHistory("");
+            }
             reset();
             calculationComplete = false;
             currentInput = number;
@@ -115,7 +122,12 @@ function appendOperator(op) {
 function calculate() {
     if (currentInput === "" || !operator) return;
     let result = operate(parseFloat(previousValue), parseFloat(currentInput), operator);
-    result = (Number((result).toFixed(10))).toString();
+    if (result !== "Error") {
+        result = (Number((result).toFixed(10))).toString();
+    } else {
+        error = true;
+        toggleButtonState(error);
+    }
     updateHistory(displayHistory.textContent + currentInput + "=");
     updateDisplay(result);
     reset(result);
@@ -132,17 +144,36 @@ function operate(a, b, op) {
     }
 }
 
+function toggleButtonState(state) {
+    btnDot.disabled = state;
+    btnPercent.disabled = state;
+    btnChangeSign.disabled = state;
+    btnOperator.forEach(button => {
+        button.disabled = state;
+    });
+}
+
 function clearDisplay() {
     currentInput = "";
     previousValue = "";
     operator = null;
     updateDisplay("0");
-    updateHistory("-");
+    updateHistory("");
+    if (error) {
+        error = false;
+        toggleButtonState(error);
+    }
 }
 
 function clear() {
-    currentInput = "";
-    updateDisplay("0");
+    if (error) {
+        error = false;
+        clearDisplay();
+        toggleButtonState(error);
+    } else {
+        currentInput = "";
+        updateDisplay("0");
+    }
 }
 
 function updateDisplay(value) {
@@ -155,6 +186,6 @@ function updateHistory(value) {
 
 function reset(result) {
     currentInput = "";
-    previousValue = result || "";
+    previousValue = result !== "Error" ? result || "" : "";
     operator = null;
 }

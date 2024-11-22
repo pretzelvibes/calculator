@@ -192,8 +192,12 @@ function clearCalculator() {
 }
 
 function clearEntry() {
-    currentInput = "";
-    updateDisplay(0);
+    if (calculationComplete) {
+        clearCalculator();
+    } else {
+        currentInput = "";
+        updateDisplay(0);
+    }
 }
 
 function toggleButtonsOnError(state = false) {

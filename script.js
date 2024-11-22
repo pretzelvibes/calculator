@@ -111,9 +111,13 @@ function handleDecimal() {
 function handlePercent() {
     if (currentInput === "") return;
     if (previousValue === "") {
-        currentInput = parseFloat(currentInput) / 100;
+        currentInput = "0";
     } else {
-        currentInput = parseFloat(previousValue) * parseFloat(currentInput) / 100;
+        if (operator === "+" || operator === "-"){
+            currentInput = parseFloat(previousValue) * parseFloat(currentInput) / 100;
+        } else if (operator === "*" || operator === "/") {
+            currentInput = parseFloat(currentInput) / 100;
+        }
     }
     updateDisplay(currentInput);
     updateHistory();
@@ -186,7 +190,6 @@ function clearCalculator() {
     updateDisplay(0);
     historyDisplay.textContent = "";
 }
-
 
 function clearEntry() {
     currentInput = "";

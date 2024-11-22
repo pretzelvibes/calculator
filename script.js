@@ -24,7 +24,7 @@ const btnOperator = document.querySelectorAll(".operator");
 
 btnChangeSign.addEventListener("click", handleChangeSign);
 btnZero.addEventListener("click", () => handleNumber("0"));
-btnDot.addEventListener("click", () => handleDecimal);
+btnDot.addEventListener("click", handleDecimal);
 btnOne.addEventListener("click", () => handleNumber("1"));
 btnTwo.addEventListener("click", () => handleNumber("2"));
 btnThree.addEventListener("click", () => handleNumber("3"));
@@ -66,6 +66,7 @@ function handleNumber(number) {
 }
 
 function handleOperator(selectedOperator) {
+    btnDot.disabled = false;
     if (currentInput === "" && previousValue === "") currentInput = "0";
     if (previousValue !== "" && currentInput !== "") {
         const tempPrevious = previousValue;
@@ -81,6 +82,7 @@ function handleOperator(selectedOperator) {
 }
 
 function handleEqual() {
+    btnDot.disabled = false;
     if (onError) {
         toggleButtonsOnError(false);
         display.textContent = "";
@@ -188,6 +190,7 @@ function clearCalculator() {
     operationHistory = "";
     updateDisplay(0);
     historyDisplay.textContent = "";
+    btnDot.disabled = false;
 }
 
 function clearEntry() {
@@ -200,6 +203,7 @@ function clearEntry() {
     } else {
         currentInput = "";
         updateDisplay(0);
+        btnDot.disabled = false;
     }
 }
 

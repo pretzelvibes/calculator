@@ -136,12 +136,10 @@ function handleChangeSign() {
     }
 }
 
-
 function calculate() {
     const a = parseFloat(previousValue);
     const b = parseFloat(currentInput);
     let result;
-
     switch (operator) {
         case "+":
             result = a + b;
@@ -158,7 +156,6 @@ function calculate() {
         default:
             return;
     }
-
     if (result === "Error") {
         updateDisplay("Cannot divide by zero");
         resetCalculationState();
@@ -166,7 +163,6 @@ function calculate() {
         onError = true;
         return;
     }
-
     result = Number(result.toFixed(10));
     previousValue = result.toString();
     currentInput = "";
@@ -180,8 +176,11 @@ function resetCalculationState() {
     calculationComplete = true;
 }
 
-
 function clearCalculator() {
+    if (onError) {
+        toggleButtonsOnError(false);
+        onError = false;
+    }
     currentInput = "";
     previousValue = "";
     operator = null;
@@ -192,6 +191,10 @@ function clearCalculator() {
 }
 
 function clearEntry() {
+    if (onError) {
+        toggleButtonsOnError(false);
+        onError = false;
+    }
     if (calculationComplete) {
         clearCalculator();
     } else {

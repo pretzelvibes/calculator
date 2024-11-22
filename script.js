@@ -22,7 +22,7 @@ const historyDisplay = document.querySelector("#history");
 const display = document.querySelector("#display");
 const btnOperator = document.querySelectorAll(".operator");
 
-btnChangeSign.addEventListener("click", () => handleChangeSign);
+btnChangeSign.addEventListener("click", handleChangeSign);
 btnZero.addEventListener("click", () => handleNumber("0"));
 btnDot.addEventListener("click", () => handleDecimal);
 btnOne.addEventListener("click", () => handleNumber("1"));
@@ -39,7 +39,7 @@ btnMinus.addEventListener("click", () => handleOperator("-"));
 btnPer.addEventListener("click", () => handleOperator("*"));
 btnEqual.addEventListener("click", handleEqual);
 btnDivide.addEventListener("click", () => handleOperator("/"));
-btnPercent.addEventListener("click", () => handlePercent);
+btnPercent.addEventListener("click", handlePercent);
 btnClearEntry.addEventListener("click", clearEntry);
 btnClearAll.addEventListener("click", clearCalculator);
 
@@ -48,8 +48,14 @@ let previousValue = "";
 let operator = null;
 let calculationComplete = false;
 let operationHistory = "";
+let onError = false;
 
 function handleNumber(number) {
+    if (onError) {
+        toggleButtonsOnError(false);
+        historyDisplay.textContent = "";
+        onError = false;
+    }
     if (currentInput === "0" && number === "0") return;
     if (calculationComplete) {
         currentInput = "";
@@ -61,7 +67,6 @@ function handleNumber(number) {
 
 function handleOperator(selectedOperator) {
     if (currentInput === "" && previousValue === "") currentInput = "0";
-
     if (previousValue !== "" && currentInput !== "") {
         const tempPrevious = previousValue;
         const tempOperator = operator;
@@ -69,15 +74,19 @@ function handleOperator(selectedOperator) {
         calculate();
         operationHistory = tempPrevious + tempOperator + tempCurrent + "=";
     }
-
     operator = selectedOperator;
     previousValue = currentInput || previousValue;
     currentInput = "";
     updateHistory();
 }
 
-
 function handleEqual() {
+    if (onError) {
+        toggleButtonsOnError(false);
+        display.textContent = "";
+        historyDisplay.textContent = "";
+        onError = false;
+    }
     if (previousValue === "" || operator === null) return;
     if (currentInput === "") currentInput = "0";
     operationHistory = previousValue + operator + currentInput + "=";
@@ -86,7 +95,6 @@ function handleEqual() {
     calculationComplete = true;
     operator = null;
 }
-
 
 function handleDecimal() {
     if (calculationComplete) {
@@ -112,20 +120,18 @@ function handlePercent() {
 }
 
 function handleChangeSign() {
-    if (calculationComplete) {
-        currentInput = (parseFloat(currentInput) * -1);
+    if (currentInput) {
+        currentInput = (parseFloat(currentInput) * -1).toString();
         updateDisplay(currentInput);
-        calculationComplete = false;
-    } else {
-        if (currentInput) {
-            currentInput = (parseFloat(currentInput) * -1);
-            updateDisplay(currentInput);
-        } else if (previousValue) {
-            previousValue = (parseFloat(previousValue) * -1);
-            updateDisplay(previousValue);
-        }
+    } else if (previousValue && !currentInput && !calculationComplete) {
+        previousValue = (parseFloat(previousValue) * -1).toString();
+        updateDisplay(previousValue);
+    } else if (previousValue && calculationComplete) {
+        previousValue = (parseFloat(previousValue) * -1).toString();
+        updateDisplay(previousValue);
     }
 }
+
 
 function calculate() {
     const a = parseFloat(previousValue);
@@ -149,11 +155,27 @@ function calculate() {
             return;
     }
 
-    result = Number((result).toFixed(10));
+    if (result === "Error") {
+        updateDisplay("Cannot divide by zero");
+        resetCalculationState();
+        toggleButtonsOnError(true);
+        onError = true;
+        return;
+    }
+
+    result = Number(result.toFixed(10));
     previousValue = result.toString();
     currentInput = "";
     updateDisplay(result);
 }
+
+function resetCalculationState() {
+    currentInput = "";
+    previousValue = "";
+    operator = null;
+    calculationComplete = true;
+}
+
 
 function clearCalculator() {
     currentInput = "";
@@ -171,7 +193,7 @@ function clearEntry() {
     updateDisplay(0);
 }
 
-function toggleButtonState(state) {
+function toggleButtonsOnError(state = false) {
     btnDot.disabled = state;
     btnPercent.disabled = state;
     btnChangeSign.disabled = state;

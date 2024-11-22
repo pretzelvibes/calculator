@@ -16,159 +16,151 @@ const btnPer = document.querySelector("#per");
 const btnEqual = document.querySelector("#equal");
 const btnDivide = document.querySelector("#divide");
 const btnPercent = document.querySelector("#percent");
-const btnClear = document.querySelector("#clear");
-const btnClearDisplay = document.querySelector("#clearDisplay");
-const displayHistory = document.querySelector("#history");
+const btnClearEntry = document.querySelector("#clearEntry");
+const btnClearAll = document.querySelector("#clearAll");
+const historyDisplay = document.querySelector("#history");
 const display = document.querySelector("#display");
 const btnOperator = document.querySelectorAll(".operator");
 
-btnChangeSign.addEventListener("click", () => appendNumber("-"));
-btnZero.addEventListener("click", () => appendNumber("0"));
-btnDot.addEventListener("click", () => appendNumber("."));
-btnOne.addEventListener("click", () => appendNumber("1"));
-btnTwo.addEventListener("click", () => appendNumber("2"));
-btnThree.addEventListener("click", () => appendNumber("3"));
-btnFour.addEventListener("click", () => appendNumber("4"));
-btnFive.addEventListener("click", () => appendNumber("5"));
-btnSix.addEventListener("click", () => appendNumber("6"));
-btnSeven.addEventListener("click", () => appendNumber("7"));
-btnEight.addEventListener("click", () => appendNumber("8"));
-btnNine.addEventListener("click", () => appendNumber("9"));
-btnPlus.addEventListener("click", () => appendOperator("+"));
-btnMinus.addEventListener("click", () => appendOperator("-"));
-btnPer.addEventListener("click", () => appendOperator("*"));
-btnEqual.addEventListener("click", calculate);
-btnDivide.addEventListener("click", () => appendOperator("/"));
-btnPercent.addEventListener("click", () => appendNumber("%"));
-btnClear.addEventListener("click", clear);
-btnClearDisplay.addEventListener("click", clearDisplay);
+btnChangeSign.addEventListener("click", () => handleChangeSign);
+btnZero.addEventListener("click", () => handleNumber("0"));
+btnDot.addEventListener("click", () => handleDecimal);
+btnOne.addEventListener("click", () => handleNumber("1"));
+btnTwo.addEventListener("click", () => handleNumber("2"));
+btnThree.addEventListener("click", () => handleNumber("3"));
+btnFour.addEventListener("click", () => handleNumber("4"));
+btnFive.addEventListener("click", () => handleNumber("5"));
+btnSix.addEventListener("click", () => handleNumber("6"));
+btnSeven.addEventListener("click", () => handleNumber("7"));
+btnEight.addEventListener("click", () => handleNumber("8"));
+btnNine.addEventListener("click", () => handleNumber("9"));
+btnPlus.addEventListener("click", () => handleOperator("+"));
+btnMinus.addEventListener("click", () => handleOperator("-"));
+btnPer.addEventListener("click", () => handleOperator("*"));
+btnEqual.addEventListener("click", handleEqual);
+btnDivide.addEventListener("click", () => handleOperator("/"));
+btnPercent.addEventListener("click", () => handlePercent);
+btnClearEntry.addEventListener("click", clearEntry);
+btnClearAll.addEventListener("click", clearCalculator);
 
 let currentInput = "";
-let operator = null;
 let previousValue = "";
-let history = "";
+let operator = null;
 let calculationComplete = false;
-let error = false;
 
-function appendNumber(number) {
+function handleNumber(number) {
     if (currentInput === "0" && number === "0") return;
     if (calculationComplete) {
-        if (number === "-") {
-            toggleNegativeSign(true);
-        } else {
-            if (error) {
-                error = false;
-                toggleButtonState(error);
-                updateHistory("");
-            }
-            reset();
-            if (number === ".") {
-                toggleDot();
-            } else {
-                currentInput = number;
-            }
-            updateHistory("");
-            calculationComplete = false;
-        }
-    } else {
-        if (number === ".") {
-            toggleDot();
-        } else if (number === "-") {
-            toggleNegativeSign();
-        } else {
-            currentInput += number;
-        }
+        currentInput = "";
+        calculationComplete = false;
     }
-    updateDisplay(currentInput || previousValue);
+    currentInput += number;
+    updateDisplay(currentInput);
 }
 
-function toggleDot() {
+function handleOperator(selectedOperator) {
+    if (currentInput === "" && previousValue === "") currentInput = "0";
+    if (currentInput === "" && previousValue !== "") {
+        operator = selectedOperator;
+        updateHistory();
+        return;
+    }
+    if (previousValue !== "" && currentInput !== "") {
+        calculate();
+    }
+    operator = selectedOperator;
+    previousValue = currentInput || previousValue;
+    currentInput = "";
+    updateHistory();
+}
+
+function handleEqual() {
+    if (previousValue === "" || operator === null) return;
+    if (currentInput === "") currentInput = "0";
+    calculate();
+    calculationComplete = true;
+    operator = null;
+    updateHistory();
+}
+
+function handleDecimal() {
+    if (calculationComplete) {
+        currentInput = "";
+        calculationComplete = false;
+    }
     if (!currentInput.includes(".")) {
         currentInput += currentInput ? "." : "0.";
         btnDot.disabled = true;
     }
+    updateDisplay(currentInput);
 }
 
-function toggleNegativeSign(applyToPrevious = false) {
-    if (calculationComplete) {
-        if (applyToPrevious) {
-            previousValue = previousValue.startsWith("-")
-                ? previousValue.slice(1)
-                : "-" + previousValue;
-            updateDisplay(previousValue);
-            updateHistory(previousValue);
-        }
+function handlePercent() {
+    if (currentInput === "") return;
+    if (previousValue === "") {
+        currentInput = parseFloat(currentInput) / 100;
     } else {
-        if (applyToPrevious) {
-            previousValue = previousValue.startsWith("-")
-                ? previousValue.slice(1)
-                : "-" + previousValue;
-        } else {
-            currentInput = currentInput.startsWith("-")
-                ? currentInput.slice(1)
-                : "-" + currentInput;
-        }
-        updateDisplay(currentInput || previousValue);
+        currentInput = parseFloat(previousValue) * parseFloat(currentInput) / 100;
     }
+    updateDisplay(currentInput);
+    updateHistory();
 }
 
-function appendOperator(op) {
+function handleChangeSign() {
     if (calculationComplete) {
+        currentInput = (parseFloat(currentInput) * -1);
+        updateDisplay(currentInput);
         calculationComplete = false;
-    }
-    if (currentInput === "" && previousValue === "") {
-        currentInput = "0";
-    }
-    if (currentInput !== "") {
-        if (previousValue === "") {
-            if (currentInput === "0.") {
-                currentInput = "0";
-            }
-            previousValue = currentInput;
-        } else if (operator) {
-            calculate();
+    } else {
+        if (currentInput) {
+            currentInput = (parseFloat(currentInput) * -1);
+            updateDisplay(currentInput);
+        } else if (previousValue) {
+            previousValue = (parseFloat(previousValue) * -1);
+            updateDisplay(previousValue);
         }
     }
-    updateHistory(previousValue + op);
-    operator = op;
-    currentInput = "";
-    btnDot.disabled = false;
 }
 
 function calculate() {
-    if (error) {
-        error = false;
-        toggleButtonState(error);
-        reset();
-        calculationComplete = false;
-        updateDisplay("0");
-        updateHistory("");
-        return;
+    const a = parseFloat(previousValue);
+    const b = parseFloat(currentInput);
+    let result;
+
+    switch (operator) {
+        case "+":
+            result = a + b;
+            break;
+        case "-":
+            result = a - b;
+            break;
+        case "*":
+            result = a * b;
+            break;
+        case "/":
+            result = b !== 0 ? a / b : "Error";
+            break;
+        default:
+            return;
     }
-    if (currentInput === "") currentInput = "0";
-    if (!operator) return;
-    let result = operate(parseFloat(previousValue), parseFloat(currentInput), operator);
-    if (result !== "Error") {
-        result = (Number((result).toFixed(10))).toString();
-    } else {
-        error = true;
-        toggleButtonState(error);
-    }
-    updateHistory(displayHistory.textContent + currentInput + "=");
+
+    result = Number((result).toFixed(10));
+    previousValue = result.toString();
+    currentInput = "";
     updateDisplay(result);
-    reset(result);
-    calculationComplete = true;
-    btnDot.disabled = false;
 }
 
-function operate(a, b, op) {
-    switch (op) {
-        case "+": return a + b;
-        case "-": return a - b;
-        case "*": return a * b;
-        case "/": return b !== 0 ? a / b : "Error";
-        default: return 0;
-    }
+function clearCalculator() {
+    currentInput = "";
+    previousValue = "";
+    operator = null;
+    calculationComplete = false;
+    updateDisplay(0);
+    historyDisplay.textContent = "";
+}
+
+function clearEntry() {
+
 }
 
 function toggleButtonState(state) {
@@ -180,42 +172,14 @@ function toggleButtonState(state) {
     });
 }
 
-function clearDisplay() {
-    currentInput = "";
-    previousValue = "";
-    operator = null;
-    updateDisplay("0");
-    updateHistory("");
-    if (error) {
-        error = false;
-        toggleButtonState(error);
-    }
-}
-
-function clear() {
-    if (error) {
-        error = false;
-        clearDisplay();
-        toggleButtonState(error);
-    } else if (calculationComplete) {
-        calculationComplete = false;
-        clearDisplay();
-    } else {
-        currentInput = "";
-        updateDisplay("0");
-    }
-}
-
 function updateDisplay(value) {
     display.textContent = value;
 }
 
-function updateHistory(value) {
-    displayHistory.textContent = value;
-}
-
-function reset(result) {
-    currentInput = "";
-    previousValue = result !== "Error" ? result || "" : "";
-    operator = null;
+function updateHistory() {
+    if (previousValue !== "" && operator) {
+        historyDisplay.textContent = previousValue + operator + currentInput;
+    } else {
+        historyDisplay.textContent = previousValue;
+    }
 }

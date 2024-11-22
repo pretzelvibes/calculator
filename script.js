@@ -47,6 +47,7 @@ let currentInput = "";
 let previousValue = "";
 let operator = null;
 let calculationComplete = false;
+let operationHistory = "";
 
 function handleNumber(number) {
     if (currentInput === "0" && number === "0") return;
@@ -60,28 +61,32 @@ function handleNumber(number) {
 
 function handleOperator(selectedOperator) {
     if (currentInput === "" && previousValue === "") currentInput = "0";
-    if (currentInput === "" && previousValue !== "") {
-        operator = selectedOperator;
-        updateHistory();
-        return;
-    }
+
     if (previousValue !== "" && currentInput !== "") {
+        const tempPrevious = previousValue;
+        const tempOperator = operator;
+        const tempCurrent = currentInput;
         calculate();
+        operationHistory = tempPrevious + tempOperator + tempCurrent + "=";
     }
+
     operator = selectedOperator;
     previousValue = currentInput || previousValue;
     currentInput = "";
     updateHistory();
 }
 
+
 function handleEqual() {
     if (previousValue === "" || operator === null) return;
     if (currentInput === "") currentInput = "0";
+    operationHistory = previousValue + operator + currentInput + "=";
     calculate();
+    updateHistory(true);
     calculationComplete = true;
     operator = null;
-    updateHistory();
 }
+
 
 function handleDecimal() {
     if (calculationComplete) {
@@ -155,12 +160,15 @@ function clearCalculator() {
     previousValue = "";
     operator = null;
     calculationComplete = false;
+    operationHistory = "";
     updateDisplay(0);
     historyDisplay.textContent = "";
 }
 
-function clearEntry() {
 
+function clearEntry() {
+    currentInput = "";
+    updateDisplay(0);
 }
 
 function toggleButtonState(state) {
@@ -176,10 +184,12 @@ function updateDisplay(value) {
     display.textContent = value;
 }
 
-function updateHistory() {
-    if (previousValue !== "" && operator) {
+function updateHistory(isEqual = false) {
+    if (isEqual) {
+        historyDisplay.textContent = operationHistory;
+    } else if (previousValue && operator) {
         historyDisplay.textContent = previousValue + operator + currentInput;
     } else {
-        historyDisplay.textContent = previousValue;
+        historyDisplay.textContent = currentInput;
     }
 }
